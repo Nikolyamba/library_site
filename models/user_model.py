@@ -14,6 +14,7 @@ class User(Base):
     birthday = Column(Date(), unique=False, nullable=True)
     sex = Column(String(10), unique=False, nullable=True)
     profile_picture = Column(String(200), unique=False, nullable=True)
+    refresh_token = Column(String(250), unique=False, nullable=True)
     is_admin = Column(Boolean(), default=False, nullable=True)
     # comments = relationship("Comment", back_populates="users")
 
