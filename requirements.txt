@@ -4,3 +4,4 @@ sqlalchemy
 typing
 jwt
 dotenv
+bcrypt
