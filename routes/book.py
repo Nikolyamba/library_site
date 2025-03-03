@@ -121,3 +121,37 @@ async def edit_book(book_title: str, data: BookUpdate, current_user: str = Depen
         raise HTTPException(status_code=500, detail="Произошла ошибка на сервере")
     finally:
         session.close()
+
+class BookUpdate(BaseModel):
+    title: str
+    year: Optional[int] = None
+    pages: Optional[int] = None
+    profile_picture: str
+    author_id: int
+
+@book_router.patch("/books/{book_title}")
+async def edit_book(book_title: str, data: BookUpdate, current_user: str = Depends(get_current_user)) -> BookUpdate:
+    check_admin(current_user)
+    session = SessionLocal()
+    try:
+        current_book = session.query(Book).filter(Book.title == book_title).first()
+        if not current_book:
+            raise HTTPException(status_code=400, detail="Книга не найдена")
+        if data.title:
+            current_book.title = data.title
+        if data.year:
+            current_book.year = data.year
+        if data.pages:
+            current_book.pages = data.pages
+        if data.profile_picture:
+            current_book.profile_picture = data.profile_picture
+        if data.author_id:
+            current_book.author_id = data.author_id
+        session.commit()
+        session.refresh(current_book)
+        return current_book
+    except Exception as e:
+        print(f"Ошибка: {e}")
+        raise HTTPException(status_code=500, detail="Произошла ошибка на сервере")
+    finally:
+        session.close()
