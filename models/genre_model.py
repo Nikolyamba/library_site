@@ -8,6 +8,7 @@ class Genre(Base):
     id = Column(Integer(), primary_key=True, autoincrement=True)
     genre_name = Column(String(36), unique=True, nullable=False)
     books = relationship("Book", secondary='book_genre_association', back_populates="genres")
+    comments = relationship("Comment", back_populates="genre")
 
 
 class BookGenreAssociation(Base):

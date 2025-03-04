@@ -12,3 +12,13 @@ class Book(Base):
     author_id = Column(Integer(), ForeignKey("authors.id"))
     author = relationship("Author", back_populates="books")
     genres = relationship("Genre", secondary='book_genre_association', back_populates="books")
+    comments = relationship("Comment", back_populates="book")
+    readers = relationship("UserBook", back_populates="book")
+
+class UserBook(Base):
+    __tablename__ = "user_books"
+    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    book_id = Column(Integer, ForeignKey('books.id'), primary_key=True)
+
+    user = relationship("User", back_populates="readed_books")
+    book = relationship("Book", back_populates="readers")

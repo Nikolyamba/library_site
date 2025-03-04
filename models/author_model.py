@@ -11,3 +11,4 @@ class Author(Base):
     country = Column(String(36), unique=False, nullable=True)
     profile_picture = Column(String(200), unique=False, nullable=False)
     books = relationship("Book", back_populates="author")
+    comments = relationship("Comment", back_populates="author")

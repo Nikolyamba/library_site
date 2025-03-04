@@ -10,6 +10,7 @@ from database import SessionLocal
 from models import User
 from jwt_token import create_access_token, get_current_user, create_refresh_token, ALGORITHM, SECRET_KEY
 from routes.admin_func import check_admin
+from routes.book import BookInfo
 
 user_router = APIRouter()
 
@@ -117,6 +118,7 @@ class UserInfo(BaseModel):
     birthday: Optional[date] = None
     sex: Optional[str] = None
     profile_picture: Optional[str] = None
+    readed_books: List[BookInfo]
 
 class UserInfoAdmin(BaseModel):
     id: int
@@ -130,6 +132,7 @@ class UserInfoAdmin(BaseModel):
     profile_picture: Optional[str] = None
     refresh_token: str
     is_admin: bool
+    readed_books: List[BookInfo]
 
 @user_router.get("/users/{user_login}")
 async def get_user(user_login: str, current_user: str = Depends(get_current_user)) -> Union[UserInfo, UserInfoAdmin]:
@@ -140,6 +143,9 @@ async def get_user(user_login: str, current_user: str = Depends(get_current_user
         if not find_user:
             raise HTTPException(status_code=400, detail="Пользователя с таким логином не существует!")
         if current_user_info.is_admin:
+            readed_books_info = []
+            for read_book in find_user.readed_books:
+                readed_books_info.append(read_book.book)
             user_info = UserInfoAdmin(
                 id=find_user.id,
                 login=find_user.login,
@@ -151,17 +157,22 @@ async def get_user(user_login: str, current_user: str = Depends(get_current_user
                 sex=find_user.sex,
                 profile_picture=find_user.profile_picture,
                 refresh_token=find_user.refresh_token,
-                is_admin=find_user.is_admin
+                is_admin=find_user.is_admin,
+                readed_books=readed_books_info
             )
             return user_info
         else:
+            readed_books_info = []
+            for read_book in find_user.readed_books:
+                readed_books_info.append(read_book.book)
             user_info = UserInfo(
                 login=find_user.login,
                 name=find_user.name,
                 surname=find_user.surname,
                 birthday=find_user.birthday,
                 sex=find_user.sex,
-                profile_picture=find_user.profile_picture
+                profile_picture=find_user.profile_picture,
+                readed_books=readed_books_info
             )
             return user_info
     except Exception as e:
