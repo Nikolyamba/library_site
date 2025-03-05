@@ -1,6 +1,6 @@
 from typing import Annotated, List, Optional
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Body
 from pydantic import BaseModel
 from sqlalchemy import and_
 
@@ -21,6 +21,7 @@ class BookRegister(BaseModel):
 
 class AfterBookRegister(BaseModel):
     title: str
+    profile_picture: str
 
 @book_router.post("/register_book", response_model=AfterBookRegister)
 async def book_register(book: BookRegister, current_user = Depends(get_current_user)):
@@ -139,7 +140,7 @@ async def edit_book(book_title: str, data: BookUpdate, current_user: str = Depen
         session.close()
 
 @book_router.post("/books/{book_title}")
-async def add_book_to_user(book_title: str, current_user: str = Depends(get_current_user)) -> dict:
+async def add_book_to_user(book_title: Annotated[str, Body()], current_user: str = Depends(get_current_user)) -> dict:
     session = SessionLocal()
     try:
         current_book = session.query(Book).filter(Book.title == book_title).first()

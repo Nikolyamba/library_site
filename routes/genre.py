@@ -1,16 +1,18 @@
-from typing import List, Dict
+from typing import List, Dict, Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Body
 
 from database import SessionLocal
 from jwt_token import get_current_user
-from models import Genre
+from models import Genre, Book
+from models.genre_model import BookGenreAssociation
 from routes.admin_func import check_admin
+from routes.book import AfterBookRegister
 
 genre_router = APIRouter()
 
 @genre_router.post("/genre_register")
-async def genre_register(genre_name: str, current_user: str = Depends(get_current_user)) -> dict:
+async def genre_register(genre_name: Annotated[str, Body()], current_user: str = Depends(get_current_user)) -> dict:
     check_admin(current_user)
     session = SessionLocal()
     try:
@@ -37,6 +39,28 @@ async def get_all_genres() -> List[str]:
         for genre in all_genres:
             list_all_genres.append(genre.genre_name)
         return list_all_genres
+    except Exception as e:
+        print(f"Ошибка: {e}")
+        raise HTTPException(status_code=500, detail="Произошла ошибка на сервере")
+    finally:
+        session.close()
+
+@genre_router.get("/genres/{genre_name}/books", response_model=List[AfterBookRegister])
+async def get_genre_books(genre_name: str) -> List[AfterBookRegister]:
+    session = SessionLocal()
+    try:
+        current_genre = session.query(Genre).filter(Genre.name == genre_name).first()
+        if not current_genre:
+            raise HTTPException(status_code=400, detail="Такого жанра нет!")
+        genre_books_assoc = session.query(BookGenreAssociation).filter(BookGenreAssociation.genre_id == current_genre.id).all()
+        book_ids = []
+        for books_id in genre_books_assoc:
+            book_ids.append(books_id.book_id)
+        genre_books = session.query(Book).filter(Book.id.in_(book_ids)).all()
+        info_about_book = []
+        for book in genre_books:
+            info_about_book.append(AfterBookRegister(title = book.title, profile_picture = book.profile_picture))
+        return info_about_book
     except Exception as e:
         print(f"Ошибка: {e}")
         raise HTTPException(status_code=500, detail="Произошла ошибка на сервере")
