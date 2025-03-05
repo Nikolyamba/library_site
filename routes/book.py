@@ -2,7 +2,7 @@ from typing import Annotated, List, Optional
 
 from fastapi import APIRouter, HTTPException, Depends, Body
 from pydantic import BaseModel
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 
 from database import SessionLocal
 from jwt_token import get_current_user
@@ -68,7 +68,10 @@ async def get_all_books():
 class BookInfo(BookRegister):
     readers: int
 
-@book_router.get("/books/{book_title}", response_model=BookInfo)
+class BookInfoAverage(BookInfo):
+    average_rating: float
+
+@book_router.get("/books/{book_title}", response_model=BookInfoAverage)
 async def get_book(book_title: str):
     session = SessionLocal()
     try:
@@ -76,6 +79,12 @@ async def get_book(book_title: str):
         if not book:
             raise HTTPException(status_code=400, detail="Книги с таким названием нет!")
         readers_count = session.query(UserBook).filter(UserBook.book_id == book.id).count()
+        if readers_count > 0:
+            average_rating = session.query(func.avg(UserBook.rating)).filter(UserBook.bookd_id == book.id, UserBook.rating > 0).scalar()
+            average_rating = float(f"{average_rating:.2f}")
+        else:
+            average_rating = 0.00
+
         book_genres_assoc = session.query(BookGenreAssociation).filter(BookGenreAssociation.book_id == book.id).all()
         genre_ids = []
         for ids in book_genres_assoc:
@@ -84,14 +93,15 @@ async def get_book(book_title: str):
         genres = session.query(Genre).filter(Genre.id.in_(genre_ids)).all()
         for genre in genres:
             genre_titles.append(genre.genre_name)
-        book_info = BookInfo(
+        book_info = BookInfoAverage(
             title=book.title,
             year=book.year,
             pages=book.pages,
             profile_picture=book.profile_picture,
             author_id=book.author_id,
             genres=genre_titles,
-            readers=readers_count
+            readers=readers_count,
+            average_rating=average_rating
         )
         return book_info
     except Exception as e:
@@ -173,3 +183,25 @@ async def add_book_to_user(book_title: Annotated[str, Body()], current_user: str
         raise HTTPException(status_code=500, detail="Произошла ошибка на сервере")
     finally:
         session.close()
+
+@book_router.put("/books/{book_id}/rate")
+async def rate_book(book_id: int, rating: Annotated[int, Body(le=10, ge=1)],
+                    current_user: str = Depends(get_current_user)) -> dict:
+    session = SessionLocal()
+    try:
+        current_user_info = session.query(User).filter(User.login == current_user).first()
+        if not current_user_info:
+            raise HTTPException(status_code=404, detail="Пользователь не найден")
+        user_book_assoc = session.query(UserBook).filter(UserBook.book_id == book_id,
+                                                              UserBook.user_id == current_user_info.id).first()
+        if not user_book_assoc:
+            raise HTTPException(status_code=400, detail="Пользователь не прочитал такую книгу")
+        user_book_assoc.rating = rating
+        session.commit()
+        return {"detail": "Оценка успешно добавлена!"}
+    except Exception as e:
+        print(f"Ошибка: {e}")
+        raise HTTPException(status_code=500, detail="Произошла ошибка на сервере")
+    finally:
+        session.close()
+

@@ -17,8 +17,9 @@ class Book(Base):
 
 class UserBook(Base):
     __tablename__ = "user_books"
-    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
-    book_id = Column(Integer, ForeignKey('books.id'), primary_key=True)
+    user_id = Column(Integer(), ForeignKey('users.id'), primary_key=True)
+    book_id = Column(Integer(), ForeignKey('books.id'), primary_key=True)
+    rating = Column(Integer(), nullable = True)
 
     user = relationship("User", back_populates="readed_books")
     book = relationship("Book", back_populates="readers")
