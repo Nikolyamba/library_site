@@ -133,6 +133,7 @@ class BookUpdate(BaseModel):
     pages: Optional[int] = None
     profile_picture: str
     author_id: int
+    genres: List[int]
 
 @book_router.patch("/books/{book_title}")
 async def edit_book(book_title: str, data: BookUpdate, current_user: str = Depends(get_current_user)) -> BookUpdate:
@@ -153,6 +154,8 @@ async def edit_book(book_title: str, data: BookUpdate, current_user: str = Depen
                 current_book.profile_picture = data.profile_picture
             if data.author_id:
                 current_book.author_id = data.author_id
+            # if data.genres:
+            #     current_book.genres = data.genres
             session.commit()
             session.refresh(current_book)
             return current_book

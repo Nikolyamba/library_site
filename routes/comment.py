@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from database import SessionLocal
 from jwt_token import get_current_user
 from models import User
-from models.comment_model import Comment
+from models import Comment
 
 comment_router = APIRouter()
 
