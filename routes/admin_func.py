@@ -8,12 +8,13 @@ from jwt_token import get_current_user
 
 admin_router = APIRouter()
 
-def check_admin(current_user: str = Depends(get_current_user)) -> None:
+def check_admin(current_user_login: str) -> bool:
     session = SessionLocal()
     try:
-        user = session.query(User).filter(User.login == current_user).first()
-        if not user.is_admin:
-            raise HTTPException(status_code=403, detail="У вас нет прав администратора!")
+        user = session.query(User).filter(User.login == current_user_login).first()
+        if user and user.is_admin:
+            return True
+        return False
     except Exception as e:
         print(f"Ошибка: {e}")
         raise HTTPException(status_code=500, detail="Произошла ошибка на сервере")
@@ -21,7 +22,7 @@ def check_admin(current_user: str = Depends(get_current_user)) -> None:
         session.close()
 
 @admin_router.post('/add_admin')
-def add_admin(login: Annotated[str, Body()], current_user: str = Depends(get_current_user)) -> dict:
+async def add_admin(login: Annotated[str, Body()], current_user: str = Depends(get_current_user)) -> dict:
     check_admin(current_user)
     session = SessionLocal()
     try:
@@ -31,6 +32,25 @@ def add_admin(login: Annotated[str, Body()], current_user: str = Depends(get_cur
         if user_to_promote.is_admin:
             return {"detail": "Пользователь уже является администратором!"}
         user_to_promote.is_admin = True
+        session.commit()
+        return {"detail": "Пользователю даны права администратора!"}
+    except Exception as e:
+        print(f"Ошибка: {e}")
+        raise HTTPException(status_code=500, detail="Произошла ошибка на сервере")
+    finally:
+        session.close()
+
+@admin_router.post('/add_author')
+async def add_author(login: Annotated[str, Body()], current_user: str = Depends(get_current_user)) -> dict:
+    check_admin(current_user)
+    session = SessionLocal()
+    try:
+        user_to_promote = session.query(User).filter(User.login == login).first()
+        if user_to_promote is None:
+            raise HTTPException(status_code=404, detail="Пользователь не найден.")
+        if user_to_promote.is_author:
+            return {"detail": "Пользователь уже является администратором!"}
+        user_to_promote.is_author = True
         session.commit()
         return {"detail": "Пользователю даны права администратора!"}
     except Exception as e:

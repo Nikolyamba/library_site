@@ -111,25 +111,27 @@ class BookUpdate(BaseModel):
 
 @book_router.patch("/books/{book_title}")
 async def edit_book(book_title: str, data: BookUpdate, current_user: str = Depends(get_current_user)) -> BookUpdate:
-    check_admin(current_user)
     session = SessionLocal()
     try:
-        current_book = session.query(Book).filter(Book.title == book_title).first()
-        if not current_book:
-            raise HTTPException(status_code=400, detail="Книга не найдена")
-        if data.title:
-            current_book.title = data.title
-        if data.year:
-            current_book.year = data.year
-        if data.pages:
-            current_book.pages = data.pages
-        if data.profile_picture:
-            current_book.profile_picture = data.profile_picture
-        if data.author_id:
-            current_book.author_id = data.author_id
-        session.commit()
-        session.refresh(current_book)
-        return current_book
+        current_user_info = session.query(User).filter(User.login == current_user).first()
+        if current_user_info.is_author or check_admin(current_user_info.login):
+            current_book = session.query(Book).filter(Book.title == book_title).first()
+            if not current_book:
+                raise HTTPException(status_code=400, detail="Книга не найдена")
+            if data.title:
+                current_book.title = data.title
+            if data.year:
+                current_book.year = data.year
+            if data.pages:
+                current_book.pages = data.pages
+            if data.profile_picture:
+                current_book.profile_picture = data.profile_picture
+            if data.author_id:
+                current_book.author_id = data.author_id
+            session.commit()
+            session.refresh(current_book)
+            return current_book
+        raise HTTPException(status_code=400, detail="У вас нет прав для редактирования книги!")
     except Exception as e:
         print(f"Ошибка: {e}")
         raise HTTPException(status_code=500, detail="Произошла ошибка на сервере")

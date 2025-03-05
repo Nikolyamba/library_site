@@ -18,6 +18,7 @@ class User(Base):
     profile_picture = Column(String(200), unique=False, nullable=True)
     refresh_token = Column(String(250), unique=False, nullable=True)
     is_admin = Column(Boolean(), default=False, nullable=True)
+    is_author = Column(Boolean(), default=False, nullable=True)
 
     readed_books = relationship("UserBook", back_populates="user")
     comments = relationship("Comment", back_populates="user")

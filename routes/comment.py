@@ -17,6 +17,7 @@ class CreateComment(BaseModel):
     genre_id: Annotated[int, None] = None
     book_id: Annotated[int, None] = None
     content: str
+
 @comment_router.post("/add_comment")
 async def create_comment(data: CreateComment) -> dict:
     session = SessionLocal()

@@ -7,8 +7,9 @@ import jwt
 from pydantic import BaseModel, Field, EmailStr
 
 from database import SessionLocal
-from models import User
+from models import User, Book
 from jwt_token import create_access_token, get_current_user, create_refresh_token, ALGORITHM, SECRET_KEY
+from models.book_model import UserBook
 from routes.admin_func import check_admin
 from routes.book import BookInfo
 
@@ -29,6 +30,7 @@ class Register(BaseModel):
     sex: Annotated[str, None] = None
     profile_picture: Annotated[str, None] = None
     is_admin: bool = False
+    is_author: bool = False
 
 @user_router.post("/register")
 async def user_register(user: Register) -> dict:
@@ -46,7 +48,8 @@ async def user_register(user: Register) -> dict:
                         birthday = user.birthday,
                         sex = user.sex,
                         profile_picture = user.profile_picture,
-                        is_admin = user.is_admin)
+                        is_admin = user.is_admin,
+                        is_author = user.is_author)
         session.add(new_user)
         session.commit()
         session.refresh(new_user)
@@ -118,6 +121,7 @@ class UserInfo(BaseModel):
     birthday: Optional[date] = None
     sex: Optional[str] = None
     profile_picture: Optional[str] = None
+    is_author: bool
     readed_books: List[BookInfo]
 
 class UserInfoAdmin(BaseModel):
@@ -132,6 +136,7 @@ class UserInfoAdmin(BaseModel):
     profile_picture: Optional[str] = None
     refresh_token: str
     is_admin: bool
+    is_author: bool
     readed_books: List[BookInfo]
 
 @user_router.get("/users/{user_login}")
@@ -158,6 +163,7 @@ async def get_user(user_login: str, current_user: str = Depends(get_current_user
                 profile_picture=find_user.profile_picture,
                 refresh_token=find_user.refresh_token,
                 is_admin=find_user.is_admin,
+                is_author=find_user.is_author,
                 readed_books=readed_books_info
             )
             return user_info
@@ -172,6 +178,7 @@ async def get_user(user_login: str, current_user: str = Depends(get_current_user
                 birthday=find_user.birthday,
                 sex=find_user.sex,
                 profile_picture=find_user.profile_picture,
+                is_author=find_user.is_author,
                 readed_books=readed_books_info
             )
             return user_info
@@ -237,5 +244,33 @@ async def edit_user(user_login: str, data: UserUpdate, current_user: str = Depen
         raise HTTPException(status_code=500, detail="Произошла ошибка на сервере")
     finally:
         session.close()
+
+@user_router.delete("/users/{user_login}/user_books/{book_title}")
+async def delete_book_from_user(user_login: str, book_title: str, current_user: str = Depends(get_current_user)) -> dict:
+    session = SessionLocal()
+    try:
+        find_user = session.query(User).filter(User.login == user_login).first()
+        if not find_user:
+            raise HTTPException(status_code=404, detail="Пользователя с таким логином не существует")
+        book = session.query(Book).filter(Book.title == book_title).first()
+        if not book:
+            raise HTTPException(status_code=404, detail="Такой книги не существует")
+        if find_user.login == current_user:
+            book_to_delete = session.query(UserBook).filter(UserBook.book_id == book.id,
+                                                            UserBook.user_id == find_user.id).first()
+            if not book_to_delete:
+                raise HTTPException(status_code=404, detail="Книга не найдена у пользователя")
+            session.delete(book_to_delete)
+            session.commit()
+        return {"detail": "Книга успешно удалена у пользователя"}
+    except Exception as e:
+        print(f"Ошибка: {e}")
+        raise HTTPException(status_code=500, detail="Произошла ошибка на сервере")
+    finally:
+        session.close()
+
+
+
+
 
 
