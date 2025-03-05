@@ -8,6 +8,7 @@ from database import SessionLocal
 from jwt_token import get_current_user
 from models import Book, User
 from models.book_model import UserBook
+from models.genre_model import BookGenreAssociation, Genre
 from routes.admin_func import check_admin
 
 book_router = APIRouter()
@@ -18,6 +19,7 @@ class BookRegister(BaseModel):
     pages: Annotated[int, None] = None
     profile_picture: str
     author_id: int
+    genres: list[int]
 
 class AfterBookRegister(BaseModel):
     title: str
@@ -36,11 +38,15 @@ async def book_register(book: BookRegister, current_user = Depends(get_current_u
                         year = book.year,
                         pages = book.pages,
                         profile_picture = book.profile_picture,
-                        author_id = book.author_id)
+                        author_id = book.author_id,
+                        genres = book.genres)
         session.add(new_book)
         session.commit()
         session.refresh(new_book)
-        return book
+        for genre_id in book.genres:
+            session.add(BookGenreAssociation(book_id = new_book.id, genre_id = genre_id))
+        session.commit()
+        return new_book
     except Exception as e:
         print(f"Ошибка: {e}")
         raise HTTPException(status_code=500, detail="Произошла ошибка на сервере")
@@ -70,13 +76,21 @@ async def get_book(book_title: str):
         if not book:
             raise HTTPException(status_code=400, detail="Книги с таким названием нет!")
         readers_count = session.query(UserBook).filter(UserBook.book_id == book.id).count()
-        #readers_count = len(book.readers)
+        book_genres_assoc = session.query(BookGenreAssociation).filter(BookGenreAssociation.book_id == book.id).all()
+        genre_ids = []
+        for ids in book_genres_assoc:
+            genre_ids.append(ids.genre_id)
+        genre_titles = []
+        genres = session.query(Genre).filter(Genre.id.in_(genre_ids)).all()
+        for genre in genres:
+            genre_titles.append(genre.genre_name)
         book_info = BookInfo(
             title=book.title,
             year=book.year,
             pages=book.pages,
             profile_picture=book.profile_picture,
             author_id=book.author_id,
+            genres=genre_titles,
             readers=readers_count
         )
         return book_info
