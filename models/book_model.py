@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, Column, String, ForeignKey
+from sqlalchemy import Integer, Column, String, ForeignKey, Float
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -10,6 +10,8 @@ class Book(Base):
     pages = Column(Integer(), nullable=True)
     profile_picture = Column(String(200), unique=False, nullable=False)
     author_id = Column(Integer(), ForeignKey("authors.id"))
+    average_rating = Column(Float(), unique=False, nullable=True)
+
     author = relationship("Author", back_populates="books")
     genres = relationship("Genre", secondary='book_genre_association', back_populates="books")
     comments = relationship("Comment", back_populates="book")

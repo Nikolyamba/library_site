@@ -80,11 +80,12 @@ async def get_book(book_title: str):
             raise HTTPException(status_code=400, detail="Книги с таким названием нет!")
         readers_count = session.query(UserBook).filter(UserBook.book_id == book.id).count()
         if readers_count > 0:
-            average_rating = session.query(func.avg(UserBook.rating)).filter(UserBook.bookd_id == book.id, UserBook.rating > 0).scalar()
+            average_rating = session.query(func.avg(UserBook.rating)).filter(UserBook.book_id == book.id, UserBook.rating > 0).scalar()
             average_rating = float(f"{average_rating:.2f}")
         else:
             average_rating = 0.00
-
+        book.average_rating = average_rating
+        session.commit()
         book_genres_assoc = session.query(BookGenreAssociation).filter(BookGenreAssociation.book_id == book.id).all()
         genre_ids = []
         for ids in book_genres_assoc:

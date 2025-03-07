@@ -2,11 +2,11 @@ from typing import Annotated, List, Optional
 
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 
 from database import SessionLocal
 from jwt_token import get_current_user
-from models import Author
+from models import Author, Book
 from routes.admin_func import check_admin
 
 author_router = APIRouter()
@@ -73,9 +73,10 @@ async def get_all_authors() -> List[GetAllAuthors]:
 class GetAuthor(BaseModel):
     name: str
     surname: str
-    patronimyc: Optional[str] = None
+    patronymic: Optional[str] = None
     country: Optional[str] = None
     profile_picture: str
+    average_rating: float
 
     class Config:
         from_attributes = True
@@ -87,6 +88,14 @@ async def get_author(author_surname: str):
         author = session.query(Author).filter(Author.surname == author_surname).first()
         if not author:
             raise HTTPException(status_code=400, detail="Автора с такой фамилией не существует!")
+        average_rating = session.query(func.avg(Book.average_rating)).filter(Book.author_id == author.id).scalar()
+        if average_rating:
+            average_rating = float(f"{average_rating:.2f}")
+            author.average_rating = average_rating
+        else:
+            average_rating = 0.00
+            author.average_rating = average_rating
+        session.commit()
         return author
     except Exception as e:
         print(f"Ошибка: {e}")
