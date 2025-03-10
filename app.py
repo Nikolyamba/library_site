@@ -22,5 +22,12 @@ app.include_router(sys_router)
 app.include_router(comment_router)
 app.include_router(a_router)
 
+@app.get("/.well-known/assetlinks.json", response_class=JSONResponse)
+async def assetlinks():
+    file_path = os.path.join(os.path.dirname(__file__), 'assetlinks.json')
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+    return data
+
 if __name__ == "__main__":
     uvicorn.run("app:app", host="127.0.0.1", port=8001)

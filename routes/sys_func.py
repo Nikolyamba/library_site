@@ -28,13 +28,6 @@ async def get_key(current_user: str = Depends(get_current_user)) -> dict:
     finally:
         session.close()
 
-@sys_router.get("/system/.well-known/assetlinks.json", response_class=JSONResponse)
-async def assetlinks():
-    file_path = os.path.join(os.path.dirname(__file__), 'assetlinks.json')
-    with open(file_path, 'r') as file:
-        data = json.load(file)
-    return data
-
 # async def check_and_award_achievment(current_user: str = Depends(get_current_user))
     
 
