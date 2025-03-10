@@ -1,5 +1,8 @@
 import uvicorn
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
+import json
+import os
 from database import init_db
 from routes.achievment import a_router
 from routes.admin_func import admin_router

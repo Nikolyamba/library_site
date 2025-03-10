@@ -1,7 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import JSONResponse
-import json
-import os
+
 from database import SessionLocal
 from jwt_token import get_current_user
 from models import User
