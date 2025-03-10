@@ -25,7 +25,7 @@ async def get_key(current_user: str = Depends(get_current_user)) -> dict:
         raise HTTPException(status_code=500, detail="Произошла ошибка на сервере")
     finally:
         session.close()
-
+#
 # async def check_and_award_achievment(current_user: str = Depends(get_current_user))
     
 
