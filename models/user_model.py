@@ -23,4 +23,5 @@ class User(Base):
     readed_books = relationship("UserBook", back_populates="user")
     comments = relationship("Comment", back_populates="user")
     received_comments = relationship("Comment", foreign_keys=[Comment.target_user_id], back_populates="target_user")
+    achievments = relationship("Achievment", secondary='user_achiev_association', back_populates="users")
 

@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "test",
+      "package_name": "com.example.test_app",
+      "sha256_cert_fingerprints": [
+        "B1:3B:4A:BE:13:E7:96:89:91:FF:85:9D:D8:9C:A1:A0:8F:B3:CF:D9:A6:A9:8C:A7:02:7D:53:D6:C3:E7:82:00"
+      ]
+    }
+  }
+]

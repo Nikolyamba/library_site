@@ -155,8 +155,15 @@ async def edit_book(book_title: str, data: BookUpdate, current_user: str = Depen
                 current_book.profile_picture = data.profile_picture
             if data.author_id:
                 current_book.author_id = data.author_id
-            # if data.genres:
-            #     current_book.genres = data.genres
+            if data.genres:
+                current_genres = session.query(BookGenreAssociation).filter(BookGenreAssociation.book_id == current_book.id).all()
+                for association in current_genres:
+                    session.delete(association)
+                current_book.genres = data.genres
+                for genre_id in data.genres:
+                    if session.query(Genre).filter(Genre.id == genre_id).first() is not None:
+                        new_book_genre_association = BookGenreAssociation(book_id = current_book.id, genre_id = genre_id)
+                        session.add(new_book_genre_association)
             session.commit()
             session.refresh(current_book)
             return current_book
@@ -168,7 +175,7 @@ async def edit_book(book_title: str, data: BookUpdate, current_user: str = Depen
         session.close()
 
 @book_router.post("/books/{book_title}")
-async def add_book_to_user(book_title: Annotated[str, Body()], current_user: str = Depends(get_current_user)) -> dict:
+async def add_book_to_user(book_title: str, current_user: str = Depends(get_current_user)) -> dict:
     session = SessionLocal()
     try:
         current_book = session.query(Book).filter(Book.title == book_title).first()
