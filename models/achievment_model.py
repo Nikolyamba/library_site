@@ -8,6 +8,7 @@ class Achievment(Base):
     id = Column(Integer(), primary_key=True, autoincrement=True)
     a_name = Column(String(50), unique=True, nullable=False)
     target = Column(Integer(), unique=False, nullable=False)
+    genre_id = Column(Integer(), nullable=True)
 
     users = relationship("User", secondary='user_achiev_association', back_populates="achievments")
 

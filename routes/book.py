@@ -10,6 +10,7 @@ from models import Book, User
 from models.book_model import UserBook
 from models.genre_model import BookGenreAssociation, Genre
 from routes.admin_func import check_admin
+from routes.sys_func import check_and_award_achievment
 
 book_router = APIRouter()
 
@@ -187,6 +188,7 @@ async def add_book_to_user(book_title: str, current_user: str = Depends(get_curr
         user_book_entry = UserBook(user_id = current_user_info.id, book_id = current_book.id)
         session.add(user_book_entry)
         session.commit()
+        await check_and_award_achievment(current_user_info.id)
         return {"success": True, "response": f"{current_book.title} успешно добавлена пользователю "
                                              f"{current_user_info.login}"}
     except Exception as e:

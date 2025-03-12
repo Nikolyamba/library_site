@@ -10,8 +10,10 @@ from database import SessionLocal
 from models import User, Book
 from jwt_token import create_access_token, get_current_user, create_refresh_token, ALGORITHM, SECRET_KEY
 from models.book_model import UserBook
+from routes.achievment import AchievmentRegister
 from routes.admin_func import check_admin
 from routes.book import BookInfo
+from routes.sys_func import check_and_remove_achievment
 
 user_router = APIRouter()
 
@@ -123,6 +125,7 @@ class UserInfo(BaseModel):
     profile_picture: Optional[str] = None
     is_author: bool
     readed_books: List[BookInfo]
+    achievments: List[AchievmentRegister]
 
 class UserInfoAdmin(BaseModel):
     id: int
@@ -138,6 +141,7 @@ class UserInfoAdmin(BaseModel):
     is_admin: bool
     is_author: bool
     readed_books: List[BookInfo]
+    achievments: List[AchievmentRegister]
 
 @user_router.get("/users/{user_login}")
 async def get_user(user_login: str, current_user: str = Depends(get_current_user)) -> Union[UserInfo, UserInfoAdmin]:
@@ -151,6 +155,14 @@ async def get_user(user_login: str, current_user: str = Depends(get_current_user
             readed_books_info = []
             for read_book in find_user.readed_books:
                 readed_books_info.append(read_book.book)
+            achievments_info = []
+            for association in find_user.achievments:
+                achievement = association.achievment
+                achievments_info.append(AchievmentRegister(
+                    a_name=achievement.a_name,
+                    target=achievement.target,
+                    genre_id=achievement.genre_id
+                ))
             user_info = UserInfoAdmin(
                 id=find_user.id,
                 login=find_user.login,
@@ -164,13 +176,22 @@ async def get_user(user_login: str, current_user: str = Depends(get_current_user
                 refresh_token=find_user.refresh_token,
                 is_admin=find_user.is_admin,
                 is_author=find_user.is_author,
-                readed_books=readed_books_info
+                readed_books=readed_books_info,
+                achievments=achievments_info
             )
             return user_info
         else:
             readed_books_info = []
             for read_book in find_user.readed_books:
                 readed_books_info.append(read_book.book)
+            achievments_info = []
+            for association in find_user.achievments:
+                achievement = association.achievment
+                achievments_info.append(AchievmentRegister(
+                    a_name=achievement.a_name,
+                    target=achievement.target,
+                    genre_id=achievement.genre_id
+                ))
             user_info = UserInfo(
                 login=find_user.login,
                 name=find_user.name,
@@ -179,7 +200,8 @@ async def get_user(user_login: str, current_user: str = Depends(get_current_user
                 sex=find_user.sex,
                 profile_picture=find_user.profile_picture,
                 is_author=find_user.is_author,
-                readed_books=readed_books_info
+                readed_books=readed_books_info,
+                achievments=achievments_info
             )
             return user_info
     except Exception as e:
@@ -262,6 +284,7 @@ async def delete_book_from_user(user_login: str, book_title: str, current_user: 
                 raise HTTPException(status_code=404, detail="Книга не найдена у пользователя")
             session.delete(book_to_delete)
             session.commit()
+        await check_and_remove_achievment(find_user.id)
         return {"detail": "Книга успешно удалена у пользователя"}
     except Exception as e:
         print(f"Ошибка: {e}")
