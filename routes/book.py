@@ -6,7 +6,7 @@ from sqlalchemy import and_, func
 
 from database import SessionLocal
 from jwt_token import get_current_user
-from models import Book, User
+from models import Book, User, Author
 from models.book_model import UserBook
 from models.genre_model import BookGenreAssociation, Genre
 from routes.admin_func import check_admin
@@ -16,8 +16,8 @@ book_router = APIRouter()
 
 class BookRegister(BaseModel):
     title: str
-    year: Annotated[int, None] = None
-    pages: Annotated[int, None] = None
+    year: int
+    pages: int
     profile_picture: str
     author_id: int
     genres: list[int]
@@ -25,6 +25,7 @@ class BookRegister(BaseModel):
 class AfterBookRegister(BaseModel):
     title: str
     profile_picture: str
+    country: str
 
 @book_router.post("/register_book", response_model=AfterBookRegister)
 async def book_register(book: BookRegister, current_user = Depends(get_current_user)):
@@ -35,10 +36,12 @@ async def book_register(book: BookRegister, current_user = Depends(get_current_u
                                                    Book.author_id == book.author_id)).first()
         if old_book:
             raise HTTPException(status_code=400, detail="Такая книга уже есть!")
+        author_country = session.query(Author).filter(Author.id == book.author_id).first()
         new_book = Book(title = book.title,
                         year = book.year,
                         pages = book.pages,
                         profile_picture = book.profile_picture,
+                        country = author_country.country,
                         author_id = book.author_id,
                         genres = book.genres)
         session.add(new_book)
@@ -54,11 +57,21 @@ async def book_register(book: BookRegister, current_user = Depends(get_current_u
     finally:
         session.close()
 
-@book_router.get("/books", response_model=List[BookRegister])
-async def get_all_books():
+@book_router.get("/books/{sort_type}", response_model=List[BookRegister])
+async def get_all_books(sort_type: Optional[str] = None):
     session = SessionLocal()
     try:
-        books = session.query(Book).order_by(Book.title).all()
+        query = session.query(Book)
+        if sort_type is None or sort_type == "rating":
+            books = query.order_by(Book.average_rating).all()
+        elif sort_type == "pages":
+            books = query.order_by(Book.pages).all()
+        elif sort_type == "year":
+            books = query.order_by(Book.year).all()
+        elif sort_type == "country":
+            books = query.order_by(Book.country).all()
+        else:
+            raise HTTPException(status_code=400, detail="Недопустимый тип сортировки")
         return books
     except Exception as e:
         print(f"Ошибка: {e}")

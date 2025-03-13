@@ -6,9 +6,10 @@ class Book(Base):
     __tablename__ = "books"
     id = Column(Integer(), primary_key=True, autoincrement=True)
     title = Column(String(50), unique=False, nullable=False)
-    year = Column(Integer(), nullable=True)
-    pages = Column(Integer(), nullable=True)
+    year = Column(Integer(), nullable=False)
+    pages = Column(Integer(), nullable=False)
     profile_picture = Column(String(200), unique=False, nullable=False)
+    country = Column(String(25), unique=False, nullable=False)
     author_id = Column(Integer(), ForeignKey("authors.id"))
     average_rating = Column(Float(), unique=False, nullable=True)
 

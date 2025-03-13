@@ -6,3 +6,4 @@ jwt
 dotenv
 bcrypt
 pydantic[email]
+uuid
