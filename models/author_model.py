@@ -1,10 +1,12 @@
+import uuid
+
 from sqlalchemy import Integer, Column, String, Float
 from sqlalchemy.orm import relationship
 from database import Base
 
 class Author(Base):
     __tablename__ = "authors"
-    id = Column(Integer(), primary_key=True, autoincrement=True)
+    id = Column(String(), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String(36), unique=False, nullable=False)
     surname = Column(String(36), unique=False, nullable=False)
     patronymic = Column(String(36), unique=False, nullable=True)

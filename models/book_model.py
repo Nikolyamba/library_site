@@ -1,16 +1,18 @@
+import uuid
+
 from sqlalchemy import Integer, Column, String, ForeignKey, Float
 from sqlalchemy.orm import relationship
 from database import Base
 
 class Book(Base):
     __tablename__ = "books"
-    id = Column(Integer(), primary_key=True, autoincrement=True)
+    id = Column(String(), primary_key=True, default=lambda: str(uuid.uuid4()))
     title = Column(String(50), unique=False, nullable=False)
     year = Column(Integer(), nullable=False)
     pages = Column(Integer(), nullable=False)
     profile_picture = Column(String(200), unique=False, nullable=False)
     country = Column(String(25), unique=False, nullable=False)
-    author_id = Column(Integer(), ForeignKey("authors.id"))
+    author_id = Column(String(), ForeignKey("authors.id"))
     average_rating = Column(Float(), unique=False, nullable=True)
 
     author = relationship("Author", back_populates="books")
@@ -20,8 +22,8 @@ class Book(Base):
 
 class UserBook(Base):
     __tablename__ = "user_books"
-    user_id = Column(Integer(), ForeignKey('users.id'), primary_key=True)
-    book_id = Column(Integer(), ForeignKey('books.id'), primary_key=True)
+    user_id = Column(String(), ForeignKey('users.id'), primary_key=True)
+    book_id = Column(String(), ForeignKey('books.id'), primary_key=True)
     rating = Column(Integer(), nullable = True)
 
     user = relationship("User", back_populates="readed_books")
