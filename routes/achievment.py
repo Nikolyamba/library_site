@@ -37,7 +37,7 @@ class InfoAboutAchievment(AchievmentRegister):
     peoples: int
 
 @a_router.get("/achievments/{achievment_id}", response_model = InfoAboutAchievment)
-async def get_achivment(achievment_id: int):
+async def get_achivment(achievment_id: str):
     session = SessionLocal()
     try:
         current_achievment = session.query(Achievment).filter(Achievment.id == achievment_id).first()
@@ -72,7 +72,7 @@ async def get_all_achivments() -> List[AchievmentRegister]:
 
 
 @a_router.delete("/achievments/{achievment_id}")
-async def delete_achievment(achievment_id: int, current_user: str = Depends(get_current_user)) -> dict:
+async def delete_achievment(achievment_id: str, current_user: str = Depends(get_current_user)) -> dict:
     session = SessionLocal()
     try:
         current_user_info = session.query(User).filter(User.login == current_user).first()
@@ -90,7 +90,7 @@ async def delete_achievment(achievment_id: int, current_user: str = Depends(get_
 
 #TODO: Нужно ли сюда жанры затаскивать?
 @a_router.patch("/achievments/{achievment_id}")
-async def edit_achievment(data: AchievmentRegister, achievment_id: int,
+async def edit_achievment(data: AchievmentRegister, achievment_id: str,
                           current_user: str = Depends(get_current_user)) -> AchievmentRegister:
     session = SessionLocal()
     try:

@@ -143,11 +143,11 @@ class UserInfoAdmin(BaseModel):
     readed_books: List[BookInfo]
     achievments: List[AchievmentRegister]
 
-@user_router.get("/users/{user_login}")
-async def get_user(user_login: str, current_user: str = Depends(get_current_user)) -> Union[UserInfo, UserInfoAdmin]:
+@user_router.get("/users/{user_id}")
+async def get_user(user_id: str, current_user: str = Depends(get_current_user)) -> Union[UserInfo, UserInfoAdmin]:
     session = SessionLocal()
     try:
-        find_user = session.query(User).filter(User.login == user_login).first()
+        find_user = session.query(User).filter(User.id == user_id).first()
         current_user_info = session.query(User).filter(User.login == current_user).first()
         if not find_user:
             raise HTTPException(status_code=400, detail="Пользователя с таким логином не существует!")
@@ -210,11 +210,11 @@ async def get_user(user_login: str, current_user: str = Depends(get_current_user
     finally:
         session.close()
 
-@user_router.delete("/users/{user_login}")
-async def delete_user(user_login: str, current_user: str = Depends(get_current_user)) -> dict:
+@user_router.delete("/users/{user_id}")
+async def delete_user(user_id: str, current_user: str = Depends(get_current_user)) -> dict:
     session = SessionLocal()
     try:
-        find_user = session.query(User).filter(User.login == user_login).first()
+        find_user = session.query(User).filter(User.id == user_id).first()
         if not find_user:
             raise HTTPException(status_code=400, detail="Пользователя с таким логином не существует")
         if find_user.login == current_user or check_admin(current_user):
@@ -236,11 +236,11 @@ class UserUpdate(BaseModel):
     sex: Optional[str] = None
     profile_picture: Optional[str] = None
 
-@user_router.patch("/users/{user_login}", response_model=UserInfo)
-async def edit_user(user_login: str, data: UserUpdate, current_user: str = Depends(get_current_user)):
+@user_router.patch("/users/{user_id}", response_model=UserInfo)
+async def edit_user(user_id: str, data: UserUpdate, current_user: str = Depends(get_current_user)):
     session = SessionLocal()
     try:
-        find_user = session.query(User).filter(User.login == user_login).first()
+        find_user = session.query(User).filter(User.id == user_id).first()
         if not find_user:
             raise HTTPException(status_code=400, detail="Пользователя с таким логином не существует")
         if find_user.login == current_user or check_admin(current_user):
@@ -267,14 +267,14 @@ async def edit_user(user_login: str, data: UserUpdate, current_user: str = Depen
     finally:
         session.close()
 
-@user_router.delete("/users/{user_login}/user_books/{book_title}")
-async def delete_book_from_user(user_login: str, book_title: str, current_user: str = Depends(get_current_user)) -> dict:
+@user_router.delete("/users/{user_id}/user_books/{book_id}")
+async def delete_book_from_user(user_id: str, book_id: str, current_user: str = Depends(get_current_user)) -> dict:
     session = SessionLocal()
     try:
-        find_user = session.query(User).filter(User.login == user_login).first()
+        find_user = session.query(User).filter(User.id == user_id).first()
         if not find_user:
             raise HTTPException(status_code=404, detail="Пользователя с таким логином не существует")
-        book = session.query(Book).filter(Book.title == book_title).first()
+        book = session.query(Book).filter(Book.id == book_id).first()
         if not book:
             raise HTTPException(status_code=404, detail="Такой книги не существует")
         if find_user.login == current_user:

@@ -45,11 +45,11 @@ async def get_all_genres() -> List[str]:
     finally:
         session.close()
 
-@genre_router.get("/genres/{genre_name}/books", response_model=List[AfterBookRegister])
-async def get_genre_books(genre_name: str) -> List[AfterBookRegister]:
+@genre_router.get("/genres/{genre_id}/books", response_model=List[AfterBookRegister])
+async def get_genre_books(genre_id: str) -> List[AfterBookRegister]:
     session = SessionLocal()
     try:
-        current_genre = session.query(Genre).filter(Genre.name == genre_name).first()
+        current_genre = session.query(Genre).filter(Genre.id == genre_id).first()
         if not current_genre:
             raise HTTPException(status_code=400, detail="Такого жанра нет!")
         genre_books_assoc = session.query(BookGenreAssociation).filter(BookGenreAssociation.genre_id == current_genre.id).all()
@@ -67,12 +67,12 @@ async def get_genre_books(genre_name: str) -> List[AfterBookRegister]:
     finally:
         session.close()
 
-@genre_router.delete("/genres/{genre_name}")
-async def delete_genre(genre_name: str, current_user: str = Depends(get_current_user)) -> dict:
+@genre_router.delete("/genres/{genre_id}")
+async def delete_genre(genre_id: str, current_user: str = Depends(get_current_user)) -> dict:
     check_admin(current_user)
     session = SessionLocal()
     try:
-        genre = session.query(Genre).filter(Genre.genre_name == genre_name).first()
+        genre = session.query(Genre).filter(Genre.id == genre_id).first()
         if not genre:
             raise HTTPException(status_code=400, detail="Такого жанра нет!")
         name = genre.genre_name
@@ -85,12 +85,12 @@ async def delete_genre(genre_name: str, current_user: str = Depends(get_current_
     finally:
         session.close()
 
-@genre_router.patch("genres/{genre_name}")
-async def edit_genre(genre_name: str, data: Dict[str, str], current_user: str = Depends(get_current_user)) -> dict:
+@genre_router.patch("genres/{genre_id}")
+async def edit_genre(genre_id: str, data: Dict[str, str], current_user: str = Depends(get_current_user)) -> dict:
     check_admin(current_user)
     session = SessionLocal()
     try:
-        current_genre = session.query(Genre).filter(Genre.genre_name == genre_name).first()
+        current_genre = session.query(Genre).filter(Genre.id == genre_id).first()
         if not current_genre:
             raise HTTPException(status_code=404, detail="Жанр не найден")
 

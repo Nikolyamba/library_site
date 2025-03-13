@@ -85,11 +85,11 @@ class BookInfo(BookRegister):
 class BookInfoAverage(BookInfo):
     average_rating: float
 
-@book_router.get("/books/{book_title}", response_model=BookInfoAverage)
-async def get_book(book_title: str):
+@book_router.get("/books/{book_id}", response_model=BookInfoAverage)
+async def get_book(book_id: str):
     session = SessionLocal()
     try:
-        book = session.query(Book).filter(Book.title == book_title).first()
+        book = session.query(Book).filter(Book.id == book_id).first()
         if not book:
             raise HTTPException(status_code=400, detail="Книги с таким названием нет!")
         readers_count = session.query(UserBook).filter(UserBook.book_id == book.id).count()
@@ -125,17 +125,18 @@ async def get_book(book_title: str):
     finally:
         session.close()
 
-@book_router.delete("/books/{book_title}")
-async def delete_book(book_title: str, current_user = Depends(get_current_user)) -> dict:
+@book_router.delete("/books/{book_id}")
+async def delete_book(book_id: str, current_user = Depends(get_current_user)) -> dict:
     check_admin(current_user)
     session = SessionLocal()
     try:
-        book = session.query(Book).filter(Book.title == book_title).first()
+        book = session.query(Book).filter(Book.id == book_id).first()
         if not book:
             raise HTTPException(status_code=400, detail="Книги с таким названием нет!")
+        book_title = book.title
         session.delete(book)
         session.commit()
-        return {"detail": f"Книга {book.title} успешно удалена"}
+        return {"detail": f"Книга {book_title} успешно удалена"}
     except Exception as e:
         print(f"Ошибка: {e}")
         raise HTTPException(status_code=500, detail="Произошла ошибка на сервере")
@@ -150,13 +151,13 @@ class BookUpdate(BaseModel):
     author_id: int
     genres: List[int]
 
-@book_router.patch("/books/{book_title}")
-async def edit_book(book_title: str, data: BookUpdate, current_user: str = Depends(get_current_user)) -> BookUpdate:
+@book_router.patch("/books/{book_id}")
+async def edit_book(book_id: str, data: BookUpdate, current_user: str = Depends(get_current_user)) -> BookUpdate:
     session = SessionLocal()
     try:
         current_user_info = session.query(User).filter(User.login == current_user).first()
         if current_user_info.is_author or check_admin(current_user_info.login):
-            current_book = session.query(Book).filter(Book.title == book_title).first()
+            current_book = session.query(Book).filter(Book.id == book_id).first()
             if not current_book:
                 raise HTTPException(status_code=400, detail="Книга не найдена")
             if data.title:
@@ -188,11 +189,11 @@ async def edit_book(book_title: str, data: BookUpdate, current_user: str = Depen
     finally:
         session.close()
 
-@book_router.post("/books/{book_title}")
-async def add_book_to_user(book_title: str, current_user: str = Depends(get_current_user)) -> dict:
+@book_router.post("/books/{book_id}")
+async def add_book_to_user(book_id: str, current_user: str = Depends(get_current_user)) -> dict:
     session = SessionLocal()
     try:
-        current_book = session.query(Book).filter(Book.title == book_title).first()
+        current_book = session.query(Book).filter(Book.id == book_id).first()
         if not current_book:
             raise HTTPException(status_code=404, detail="Книга не найдена")
         current_user_info = session.query(User).filter(User.login == current_user).first()
@@ -211,7 +212,7 @@ async def add_book_to_user(book_title: str, current_user: str = Depends(get_curr
         session.close()
 
 @book_router.put("/books/{book_id}/rate")
-async def rate_book(book_id: int, rating: Annotated[int, Body(le=10, ge=1)],
+async def rate_book(book_id: str, rating: Annotated[int, Body(le=10, ge=1)],
                     current_user: str = Depends(get_current_user)) -> dict:
     session = SessionLocal()
     try:

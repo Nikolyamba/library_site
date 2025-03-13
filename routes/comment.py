@@ -12,10 +12,10 @@ comment_router = APIRouter()
 
 class CreateComment(BaseModel):
     current_user: str = Depends(get_current_user)
-    target_user_id: Annotated[int, None] = None
-    author_id: Annotated[int, None] = None
-    genre_id: Annotated[int, None] = None
-    book_id: Annotated[int, None] = None
+    target_user_id: Annotated[str, None] = None
+    author_id: Annotated[str, None] = None
+    genre_id: Annotated[str, None] = None
+    book_id: Annotated[str, None] = None
     content: str
 
 @comment_router.post("/add_comment")
@@ -38,7 +38,7 @@ async def create_comment(data: CreateComment) -> dict:
     finally:
         session.close()
 @comment_router.patch("/comments/{comment_id}")
-async def edit_comment(comment_id: int, content: str, current_user: str = Depends(get_current_user)) -> dict:
+async def edit_comment(comment_id: str, content: str, current_user: str = Depends(get_current_user)) -> dict:
     session = SessionLocal()
     try:
         comment = session.query(Comment).filter(Comment.id == comment_id).first()
@@ -60,7 +60,7 @@ async def edit_comment(comment_id: int, content: str, current_user: str = Depend
         session.close()
 
 @comment_router.delete("/comments/{comment_id}")
-async def delete_comment(comment_id: int, current_user: str = Depends(get_current_user)) -> dict:
+async def delete_comment(comment_id: str, current_user: str = Depends(get_current_user)) -> dict:
     session = SessionLocal()
     try:
         comment = session.query(Comment).filter(Comment.id == comment_id).first()

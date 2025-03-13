@@ -81,11 +81,11 @@ class GetAuthor(BaseModel):
     class Config:
         from_attributes = True
 
-@author_router.get("/authors/{author_surname}", response_model=GetAuthor)
-async def get_author(author_surname: str):
+@author_router.get("/authors/{author_id}", response_model=GetAuthor)
+async def get_author(author_id: str):
     session = SessionLocal()
     try:
-        author = session.query(Author).filter(Author.surname == author_surname).first()
+        author = session.query(Author).filter(Author.id == author_id).first()
         if not author:
             raise HTTPException(status_code=400, detail="Автора с такой фамилией не существует!")
         average_rating = session.query(func.avg(Book.average_rating)).filter(Book.author_id == author.id).scalar()
@@ -103,16 +103,16 @@ async def get_author(author_surname: str):
     finally:
         session.close()
 
-@author_router.delete("/authors/{author_surname}")
-async def delete_author(author_surname: str, current_user: str = Depends(get_current_user)) -> dict:
+@author_router.delete("/authors/{author_id}")
+async def delete_author(author_id: str, current_user: str = Depends(get_current_user)) -> dict:
     check_admin(current_user)
     session = SessionLocal()
     try:
-        author = session.query(Author).filter(Author.surname == author_surname).first()
+        author = session.query(Author).filter(Author.id == author_id).first()
         if not author:
             raise HTTPException(status_code=400, detail="Автора с такой фамилией не существует!")
         if author.patronymic:
-            author_name = author_surname + " " + author.name + " " + author.patronymic
+            author_name = author.surname + " " + author.name + " " + author.patronymic
         else:
             author_name = author.surname + " " + author.name
         session.delete(author)
@@ -124,12 +124,12 @@ async def delete_author(author_surname: str, current_user: str = Depends(get_cur
     finally:
         session.close()
 
-@author_router.patch("/authors/{author_surname}", response_model=GetAuthor)
-def edit_author(author_surname: str, data: GetAuthor, current_user: str = Depends(get_current_user)):
+@author_router.patch("/authors/{author_id}", response_model=GetAuthor)
+def edit_author(author_id: str, data: GetAuthor, current_user: str = Depends(get_current_user)):
     check_admin(current_user)
     session = SessionLocal()
     try:
-        author = session.query(Author).filter(Author.surname == author_surname).first()
+        author = session.query(Author).filter(Author.id == author_id).first()
         if not author:
             raise HTTPException(status_code=400, detail="Автора с такой фамилией не существует!")
         if data.name:

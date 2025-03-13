@@ -29,7 +29,7 @@ async def get_key(current_user: str = Depends(get_current_user)) -> dict:
         session.close()
 
 #TODO: сделать так чтобы писалось имя пользователя, которому я вывожу ачиву
-async def check_and_award_achievment(user_id: int):
+async def check_and_award_achievment(user_id: str):
     session = SessionLocal()
     try:
         achievments = session.query(Achievment).all()
@@ -58,7 +58,7 @@ async def check_and_award_achievment(user_id: int):
     finally:
         session.close()
 
-async def check_and_remove_achievment(user_id: int):
+async def check_and_remove_achievment(user_id: str):
     session = SessionLocal()
     try:
         achievments = session.query(Achievment).all()
