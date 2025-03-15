@@ -13,7 +13,7 @@ from models.book_model import UserBook
 from routes.achievment import AchievmentRegister
 from routes.admin_func import check_admin
 from routes.book import BookInfo
-from routes.sys_func import check_and_remove_achievment
+from routes.useful_funk import check_and_remove_achievment
 
 user_router = APIRouter()
 

@@ -10,7 +10,7 @@ from models import Book, User, Author
 from models.book_model import UserBook
 from models.genre_model import BookGenreAssociation, Genre
 from routes.admin_func import check_admin
-from routes.sys_func import check_and_award_achievment
+from routes.useful_funk import check_and_award_achievment
 
 book_router = APIRouter()
 

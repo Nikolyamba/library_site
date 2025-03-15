@@ -7,7 +7,7 @@ from routes.author import author_router
 from routes.book import book_router
 from routes.comment import comment_router
 from routes.genre import genre_router
-from routes.sys_func import sys_router
+from routes.useful_funk import sys_router
 from routes.user import user_router
 
 app = FastAPI()
@@ -18,7 +18,7 @@ app.include_router(author_router)
 app.include_router(book_router)
 app.include_router(admin_router)
 app.include_router(genre_router)
-app.include_router(sys_router)
+app.include_router(useful_router)
 app.include_router(comment_router)
 app.include_router(a_router)
 
