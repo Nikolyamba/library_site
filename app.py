@@ -7,7 +7,7 @@ from routes.author import author_router
 from routes.book import book_router
 from routes.comment import comment_router
 from routes.genre import genre_router
-from routes.useful_funk import sys_router
+from routes.useful_funk import useful_router
 from routes.user import user_router
 
 app = FastAPI()
