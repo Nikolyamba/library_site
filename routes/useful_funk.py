@@ -28,7 +28,6 @@ async def get_key(current_user: str = Depends(get_current_user)) -> dict:
     finally:
         session.close()
 
-#TODO: сделать так чтобы писалось имя пользователя, которому я вывожу ачиву
 async def check_and_award_achievment(user_id: str):
     session = SessionLocal()
     try:

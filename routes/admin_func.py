@@ -8,8 +8,7 @@ from jwt_token import get_current_user
 
 admin_router = APIRouter()
 
-#TODO: СДЕЛАТЬ ФУНКЦИЮ АСИНХРОННОЙ
-def check_admin(current_user_login: str) -> bool:
+async def check_admin(current_user_login: str) -> bool:
     session = SessionLocal()
     try:
         user = session.query(User).filter(User.login == current_user_login).first()

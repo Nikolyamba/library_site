@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Column, Integer, ForeignKey, String
+from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.orm import relationship
 
 from database import Base
@@ -16,7 +16,7 @@ class Comment(Base):
     genre_id = Column(String(), ForeignKey('genres.id'), nullable=True)
     content = Column(String(), nullable=False)
 
-    user = relationship("User", back_populates="comments")
+    user = relationship("User", foreign_keys=[user_id], back_populates="comments")
     target_user = relationship("User", foreign_keys=[target_user_id], back_populates="received_comments")
     book = relationship("Book", back_populates="comments")
     author = relationship("Author", back_populates="comments")

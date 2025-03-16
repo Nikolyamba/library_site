@@ -25,7 +25,7 @@ class AfterAuthorRegister(BaseModel):
 
 @author_router.post("/register_author", response_model=AfterAuthorRegister)
 async def author_register(author: AuthorRegister, current_user: str = Depends(get_current_user)):
-    check_admin(current_user)
+    await check_admin(current_user)
     session = SessionLocal()
     try:
         old_author = session.query(Author).filter(and_(Author.name == author.name,
@@ -105,7 +105,7 @@ async def get_author(author_id: str):
 
 @author_router.delete("/authors/{author_id}")
 async def delete_author(author_id: str, current_user: str = Depends(get_current_user)) -> dict:
-    check_admin(current_user)
+    await check_admin(current_user)
     session = SessionLocal()
     try:
         author = session.query(Author).filter(Author.id == author_id).first()

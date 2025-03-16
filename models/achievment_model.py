@@ -12,7 +12,7 @@ class Achievment(Base):
     target = Column(Integer(), unique=False, nullable=False)
     genre_id = Column(String(), nullable=True)
 
-    users = relationship("User", secondary='user_achiev_association', back_populates="achievments")
+    user_achiev_associations = relationship("UserAchievAssociation", back_populates="achievment")
 
 class UserAchievAssociation(Base):
     __tablename__ = 'user_achiev_association'
@@ -20,4 +20,4 @@ class UserAchievAssociation(Base):
     achievment_id = Column(String(), ForeignKey('achievments.id'), primary_key=True)
 
     user = relationship("User", back_populates="achievments")
-    achievment = relationship("Achievment", back_populates="users")
+    achievment = relationship("Achievment", back_populates="user_achiev_associations")

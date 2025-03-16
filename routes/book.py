@@ -29,7 +29,7 @@ class AfterBookRegister(BaseModel):
 
 @book_router.post("/register_book", response_model=AfterBookRegister)
 async def book_register(book: BookRegister, current_user = Depends(get_current_user)):
-    check_admin(current_user)
+    await check_admin(current_user)
     session = SessionLocal()
     try:
         old_book = session.query(Book).filter(and_(Book.title == book.title,
@@ -127,7 +127,7 @@ async def get_book(book_id: str):
 
 @book_router.delete("/books/{book_id}")
 async def delete_book(book_id: str, current_user = Depends(get_current_user)) -> dict:
-    check_admin(current_user)
+    await check_admin(current_user)
     session = SessionLocal()
     try:
         book = session.query(Book).filter(Book.id == book_id).first()

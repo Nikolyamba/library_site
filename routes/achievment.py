@@ -88,7 +88,6 @@ async def delete_achievment(achievment_id: str, current_user: str = Depends(get_
     finally:
         session.close()
 
-#TODO: Нужно ли сюда жанры затаскивать?
 @a_router.patch("/achievments/{achievment_id}")
 async def edit_achievment(data: AchievmentRegister, achievment_id: str,
                           current_user: str = Depends(get_current_user)) -> AchievmentRegister:

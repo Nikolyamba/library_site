@@ -13,7 +13,7 @@ genre_router = APIRouter()
 
 @genre_router.post("/genre_register")
 async def genre_register(genre_name: Annotated[str, Body()], current_user: str = Depends(get_current_user)) -> dict:
-    check_admin(current_user)
+    await check_admin(current_user)
     session = SessionLocal()
     try:
         old_genre = session.query(Genre).filter(Genre.genre_name == genre_name).first()
@@ -69,7 +69,7 @@ async def get_genre_books(genre_id: str) -> List[AfterBookRegister]:
 
 @genre_router.delete("/genres/{genre_id}")
 async def delete_genre(genre_id: str, current_user: str = Depends(get_current_user)) -> dict:
-    check_admin(current_user)
+    await check_admin(current_user)
     session = SessionLocal()
     try:
         genre = session.query(Genre).filter(Genre.id == genre_id).first()
@@ -87,7 +87,7 @@ async def delete_genre(genre_id: str, current_user: str = Depends(get_current_us
 
 @genre_router.patch("genres/{genre_id}")
 async def edit_genre(genre_id: str, data: Dict[str, str], current_user: str = Depends(get_current_user)) -> dict:
-    check_admin(current_user)
+    await check_admin(current_user)
     session = SessionLocal()
     try:
         current_genre = session.query(Genre).filter(Genre.id == genre_id).first()
