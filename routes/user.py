@@ -57,6 +57,8 @@ async def user_register(user: Register) -> dict:
         session.refresh(new_user)
         access_token = create_access_token(data={"sub": user.login})
         refresh_token = create_refresh_token(data={"sub": user.login})
+        new_user.refresh_token = refresh_token
+        session.commit()
         return {"user": user.login, "access_token": access_token, "refresh_token": refresh_token}
     except Exception as e:
         print(f"Ошибка: {e}")
@@ -124,11 +126,11 @@ class UserInfo(BaseModel):
     sex: Optional[str] = None
     profile_picture: Optional[str] = None
     is_author: bool
-    readed_books: List[BookInfo]
-    achievments: List[AchievmentRegister]
+    readed_books: Optional[List[BookInfo]] = None
+    achievments: Optional[List[AchievmentRegister]] = None
 
 class UserInfoAdmin(BaseModel):
-    id: int
+    id: str
     login: str
     password: str
     name: Optional[str] = None
@@ -229,10 +231,10 @@ async def delete_user(user_id: str, current_user: str = Depends(get_current_user
         session.close()
 
 class UserUpdate(BaseModel):
-    password: str = Field(min_length = 8)
+    password: Optional[str] = Field(min_length = 8)
     name: Optional[str] = None
     surname: Optional[str] = None
-    birthday: Optional[str] = None
+    birthday: Optional[date] = None
     sex: Optional[str] = None
     profile_picture: Optional[str] = None
 
@@ -242,7 +244,7 @@ async def edit_user(user_id: str, data: UserUpdate, current_user: str = Depends(
     try:
         find_user = session.query(User).filter(User.id == user_id).first()
         if not find_user:
-            raise HTTPException(status_code=400, detail="Пользователя с таким логином не существует")
+            raise HTTPException(status_code=400, detail="Пользователя с таким id не существует")
         if find_user.login == current_user or check_admin(current_user):
             if data.password:
                 password = data.password

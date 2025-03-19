@@ -8,12 +8,12 @@ from models.book_model import UserBook, Book
 
 useful_router = APIRouter()
 
-useful_router.get("/healthcheck")
+@useful_router.get("/healthcheck")
 async def healthcheck() -> dict:
     response = {"success": True}
     return response
 
-useful_router.get("/get_key")
+@useful_router.get("/get_key")
 async def get_key(current_user: str = Depends(get_current_user)) -> dict:
     session = SessionLocal()
     try:
