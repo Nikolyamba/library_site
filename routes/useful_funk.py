@@ -28,6 +28,14 @@ async def get_key(current_user: str = Depends(get_current_user)) -> dict:
     finally:
         session.close()
 
+@useful_router.head("/get_maks")
+async def print_max_loh():
+    return "Макс лох"
+
+@useful_router.options("/get_maks_2")
+async def print_max_gay():
+    return "Макс гей"
+
 async def check_and_award_achievment(user_id: str):
     session = SessionLocal()
     try:
