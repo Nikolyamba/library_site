@@ -238,7 +238,7 @@ class UserUpdate(BaseModel):
     sex: Optional[str] = None
     profile_picture: Optional[str] = None
 
-@user_router.patch("/users/{user_id}", response_model=UserInfo)
+@user_router.patch("/users/{user_id}", response_model=UserUpdate)
 async def edit_user(user_id: str, data: UserUpdate, current_user: str = Depends(get_current_user)):
     session = SessionLocal()
     try:

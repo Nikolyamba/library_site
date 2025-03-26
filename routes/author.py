@@ -96,6 +96,7 @@ async def get_author(author_id: str):
             average_rating = 0.00
             author.average_rating = average_rating
         session.commit()
+        session.refresh(author)
         return author
     except Exception as e:
         print(f"Ошибка: {e}")
@@ -124,9 +125,16 @@ async def delete_author(author_id: str, current_user: str = Depends(get_current_
     finally:
         session.close()
 
-@author_router.patch("/authors/{author_id}", response_model=GetAuthor)
-def edit_author(author_id: str, data: GetAuthor, current_user: str = Depends(get_current_user)):
-    check_admin(current_user)
+class EditAuthor(BaseModel):
+    name: Optional[str] = None
+    surname: Optional[str] = None
+    patronymic: Optional[str] = None
+    country: Optional[str] = None
+    profile_picture: Optional[str] = None
+
+@author_router.patch("/authors/{author_id}", response_model=EditAuthor)
+async def edit_author(author_id: str, data: EditAuthor, current_user: str = Depends(get_current_user)):
+    await check_admin(current_user)
     session = SessionLocal()
     try:
         author = session.query(Author).filter(Author.id == author_id).first()
@@ -136,14 +144,14 @@ def edit_author(author_id: str, data: GetAuthor, current_user: str = Depends(get
             author.name = data.name
         if data.surname:
             author.surname = data.surname
-        if data.patronimyc:
-            author.patronimyc = data.patronimyc
+        if data.patronymic:
+            author.patronymic = data.patronymic
         if data.country:
             author.country = data.country
         if data.profile_picture:
             author.profile_picture = data.profile_picture
         session.commit()
-        session.refresh()
+        session.refresh(author)
         return author
     except Exception as e:
         print(f"Ошибка: {e}")

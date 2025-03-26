@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Union
 
 from fastapi import APIRouter, HTTPException, Depends, Body
 
@@ -8,13 +8,14 @@ from jwt_token import get_current_user
 
 admin_router = APIRouter()
 
-async def check_admin(current_user_login: str) -> bool:
+async def check_admin(current_user_login: str) -> Union[bool, dict[str, str]]:
     session = SessionLocal()
     try:
         user = session.query(User).filter(User.login == current_user_login).first()
         if user and user.is_admin:
             return True
-        return False
+        else:
+            raise HTTPException(status_code=403, detail="У вас нет прав для выполнения этого действия.")
     except Exception as e:
         print(f"Ошибка: {e}")
         raise HTTPException(status_code=500, detail="Произошла ошибка на сервере")
@@ -23,7 +24,7 @@ async def check_admin(current_user_login: str) -> bool:
 
 @admin_router.post('/add_admin')
 async def add_admin(login: Annotated[str, Body()], current_user: str = Depends(get_current_user)) -> dict:
-    check_admin(current_user)
+    await check_admin(current_user)
     session = SessionLocal()
     try:
         user_to_promote = session.query(User).filter(User.login == login).first()
@@ -42,7 +43,7 @@ async def add_admin(login: Annotated[str, Body()], current_user: str = Depends(g
 
 @admin_router.post('/add_author')
 async def add_author(login: Annotated[str, Body()], current_user: str = Depends(get_current_user)) -> dict:
-    check_admin(current_user)
+    await check_admin(current_user)
     session = SessionLocal()
     try:
         user_to_promote = session.query(User).filter(User.login == login).first()
