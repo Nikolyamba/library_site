@@ -1,5 +1,5 @@
 from datetime import date
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Annotated
 
 import bcrypt
 from fastapi import APIRouter, HTTPException, Depends, status
@@ -24,7 +24,7 @@ def hashed_password(password: str):
 
 class Register(BaseModel):
     login: str
-    password: str = Field(min_length=8)
+    password: Annotated[str, Field(min_length=8)]
     name: Optional[str, None] = None
     surname: Optional[str, None] = None
     email: EmailStr

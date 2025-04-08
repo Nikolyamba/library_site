@@ -5,5 +5,5 @@ typing
 PyJWT
 dotenv
 bcrypt
-pydantic
+pydantic[email]
 uuid
