@@ -41,9 +41,9 @@ async def user_register(user: Register) -> dict:
         old_user = session.query(User).filter((User.login == user.login) | (User.email == user.email)).first()
         if old_user:
             raise HTTPException(status_code=400, detail="Такой логин или email уже существует!")
-        user.password = hashed_password(user.password)
+        new_password = hashed_password(user.password)
         new_user = User(login = user.login,
-                        password = user.password,
+                        password = new_password,
                         name = user.name,
                         surname = user.surname,
                         email = user.email,
