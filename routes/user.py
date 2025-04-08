@@ -25,12 +25,12 @@ def hashed_password(password: str):
 class Register(BaseModel):
     login: str
     password: Annotated[str, Field(min_length=8)]
-    name: Optional[str, None] = None
-    surname: Optional[str, None] = None
+    name: Optional[str] = None
+    surname: Optional[str] = None
     email: EmailStr
-    birthday: Optional[date, None] = None
-    sex: Optional[str, None] = None
-    profile_picture: Optional[str, None] = None
+    birthday: Optional[date] = None
+    sex: Optional[str] = None
+    profile_picture: Optional[str] = None
     is_admin: bool = False
     is_author: bool = False
 
