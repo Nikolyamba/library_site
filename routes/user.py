@@ -4,7 +4,7 @@ from typing import Annotated, List, Optional, Union
 import bcrypt
 from fastapi import APIRouter, HTTPException, Depends, status
 import jwt
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field
 
 from database import SessionLocal
 from models import User, Book
@@ -27,7 +27,7 @@ class Register(BaseModel):
     password: str = Field(min_length=8)
     name: Annotated[str, None] = None
     surname: Annotated[str, None] = None
-    email: EmailStr
+    email: str
     birthday: Annotated[date, None] = None
     sex: Annotated[str, None] = None
     profile_picture: Annotated[str, None] = None
