@@ -1,10 +1,10 @@
 from datetime import date
-from typing import Annotated, List, Optional, Union
+from typing import List, Optional, Union
 
 import bcrypt
 from fastapi import APIRouter, HTTPException, Depends, status
 import jwt
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 
 from database import SessionLocal
 from models import User, Book
@@ -25,12 +25,12 @@ def hashed_password(password: str):
 class Register(BaseModel):
     login: str
     password: str = Field(min_length=8)
-    name: Annotated[str, None] = None
-    surname: Annotated[str, None] = None
-    email: str
-    birthday: Annotated[date, None] = None
-    sex: Annotated[str, None] = None
-    profile_picture: Annotated[str, None] = None
+    name: Optional[str, None] = None
+    surname: Optional[str, None] = None
+    email: EmailStr
+    birthday: Optional[date, None] = None
+    sex: Optional[str, None] = None
+    profile_picture: Optional[str, None] = None
     is_admin: bool = False
     is_author: bool = False
 

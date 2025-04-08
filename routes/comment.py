@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -12,10 +12,10 @@ comment_router = APIRouter()
 
 class CreateComment(BaseModel):
     current_user: str = Depends(get_current_user)
-    target_user_id: Annotated[str, None] = None
-    author_id: Annotated[str, None] = None
-    genre_id: Annotated[str, None] = None
-    book_id: Annotated[str, None] = None
+    target_user_id: Optional[str, None] = None
+    author_id: Optional[str, None] = None
+    genre_id: Optional[str, None] = None
+    book_id: Optional[str, None] = None
     content: str
 
 @comment_router.post("/add_comment")

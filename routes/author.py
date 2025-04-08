@@ -1,4 +1,4 @@
-from typing import Annotated, List, Optional
+from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
@@ -14,8 +14,8 @@ author_router = APIRouter()
 class AuthorRegister(BaseModel):
     name: str
     surname: str
-    patronymic: Annotated[str, None] = None
-    country: Annotated[str, None] = None
+    patronymic: Optional[str, None] = None
+    country: Optional[str, None] = None
     profile_picture: str
 
 class AfterAuthorRegister(BaseModel):

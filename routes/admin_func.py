@@ -1,4 +1,4 @@
-from typing import Annotated, Union
+from typing import Optional, Union
 
 from fastapi import APIRouter, HTTPException, Depends, Body
 
@@ -23,7 +23,7 @@ async def check_admin(current_user_login: str) -> Union[bool, dict[str, str]]:
         session.close()
 
 @admin_router.post('/add_admin')
-async def add_admin(login: Annotated[str, Body()], current_user: str = Depends(get_current_user)) -> dict:
+async def add_admin(login: Optional[str, Body()], current_user: str = Depends(get_current_user)) -> dict:
     await check_admin(current_user)
     session = SessionLocal()
     try:
@@ -42,7 +42,7 @@ async def add_admin(login: Annotated[str, Body()], current_user: str = Depends(g
         session.close()
 
 @admin_router.post('/add_author')
-async def add_author(login: Annotated[str, Body()], current_user: str = Depends(get_current_user)) -> dict:
+async def add_author(login: Optional[str, Body()], current_user: str = Depends(get_current_user)) -> dict:
     await check_admin(current_user)
     session = SessionLocal()
     try:
