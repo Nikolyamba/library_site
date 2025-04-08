@@ -23,7 +23,7 @@ async def check_admin(current_user_login: str) -> Union[bool, dict[str, str]]:
         session.close()
 
 @admin_router.post('/add_admin')
-async def add_admin(login: Optional[str, Body()], current_user: str = Depends(get_current_user)) -> dict:
+async def add_admin(login: str = Body(), current_user: str = Depends(get_current_user)) -> dict:
     await check_admin(current_user)
     session = SessionLocal()
     try:
@@ -42,7 +42,7 @@ async def add_admin(login: Optional[str, Body()], current_user: str = Depends(ge
         session.close()
 
 @admin_router.post('/add_author')
-async def add_author(login: Optional[str, Body()], current_user: str = Depends(get_current_user)) -> dict:
+async def add_author(login: str = Body(), current_user: str = Depends(get_current_user)) -> dict:
     await check_admin(current_user)
     session = SessionLocal()
     try:
