@@ -212,7 +212,7 @@ async def add_book_to_user(book_id: str, current_user: str = Depends(get_current
         session.close()
 
 @book_router.put("/books/{book_id}/rate")
-async def rate_book(book_id: str, rating: Optional[int, Body(le=10, ge=1)],
+async def rate_book(book_id: str, rating: int = Body(le=10, ge=1),
                     current_user: str = Depends(get_current_user)) -> dict:
     session = SessionLocal()
     try:

@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+from typing import List, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, Body
 
@@ -12,7 +12,7 @@ from routes.book import AfterBookRegister
 genre_router = APIRouter()
 
 @genre_router.post("/genre_register")
-async def genre_register(genre_name: Optional[str, Body()], current_user: str = Depends(get_current_user)) -> dict:
+async def genre_register(genre_name: str = Body(), current_user: str = Depends(get_current_user)) -> dict:
     await check_admin(current_user)
     session = SessionLocal()
     try:

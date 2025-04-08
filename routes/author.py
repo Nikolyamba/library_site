@@ -14,8 +14,8 @@ author_router = APIRouter()
 class AuthorRegister(BaseModel):
     name: str
     surname: str
-    patronymic: Optional[str, None] = None
-    country: Optional[str, None] = None
+    patronymic: Optional[str] = None
+    country: Optional[str] = None
     profile_picture: str
 
 class AfterAuthorRegister(BaseModel):

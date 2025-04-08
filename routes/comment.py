@@ -12,10 +12,10 @@ comment_router = APIRouter()
 
 class CreateComment(BaseModel):
     current_user: str = Depends(get_current_user)
-    target_user_id: Optional[str, None] = None
-    author_id: Optional[str, None] = None
-    genre_id: Optional[str, None] = None
-    book_id: Optional[str, None] = None
+    target_user_id: Optional[str] = None
+    author_id: Optional[str] = None
+    genre_id: Optional[str] = None
+    book_id: Optional[str] = None
     content: str
 
 @comment_router.post("/add_comment")
