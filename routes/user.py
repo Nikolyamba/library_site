@@ -59,7 +59,7 @@ async def user_register(user: Register) -> dict:
         refresh_token = create_refresh_token(data={"sub": user.login})
         new_user.refresh_token = refresh_token
         session.commit()
-        return {"user": user.login, "access_token": access_token, "refresh_token": refresh_token}
+        return {"user_id": new_user.id, "user": user.login, "access_token": access_token, "refresh_token": refresh_token}
     except Exception as e:
         print(f"Ошибка: {e}")
         raise HTTPException(status_code=500, detail="Произошла ошибка на сервере")
