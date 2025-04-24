@@ -19,6 +19,7 @@ class AuthorRegister(BaseModel):
     profile_picture: str
 
 class AfterAuthorRegister(BaseModel):
+    id: str
     name: str
     surname: str
     patronymic: Optional[str] = None
@@ -61,7 +62,7 @@ async def get_all_authors() -> List[GetAllAuthors]:
         authors = session.query(Author).order_by(Author.surname).all()
         authors_list = []
         for author in authors:
-            authors_list.append(GetAllAuthors(name=author.name, surname=author.surname, patronymic=author.patronymic,
+            authors_list.append(GetAllAuthors(id = author.id, name=author.name, surname=author.surname, patronymic=author.patronymic,
                                               profile_picture=author.profile_picture))
         return authors_list
     except Exception as e:
